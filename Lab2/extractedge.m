@@ -1,7 +1,19 @@
-function [outputArg1,outputArg2] = extractedge(inputArg1,inputArg2)
-%EXTRACTEDGE 此处显示有关此函数的摘要
-%   此处显示详细说明
-outputArg1 = inputArg1;
-outputArg2 = inputArg2;
+function edgecurves = extractedge(inpic, scale, threshold, shape)
+
+    if (nargin < 4) 
+        shape = 'same';
+    end
+
+    lv = Lv(discgaussfft(inpic, scale), shape);
+    lvv = Lvvtilde(discgaussfft(inpic, scale), shape);
+    lvvv = Lvvvtilde(discgaussfft(inpic, scale), shape);
+    lv_mask = (lv > threshold) - 0.5;
+    lvvv_mask = (lvvv < 0) - 0.5;
+
+    % sort zerocrossings with negative Lvvv and Lv above threshold
+    edgecurves = zerocrosscurves(lvv, lvvv_mask);
+    edgecurves = thresholdcurves(edgecurves, lv_mask);
+    overlaycurves(inpic, edgecurves);
+
 end
 
